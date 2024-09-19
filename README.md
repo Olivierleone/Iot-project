@@ -19,3 +19,7 @@ First phase of our IOT project
 ### 3. Verify Ip Address
 
 1. Verify ip address matches the system and in the html fetch (used to get /toggle from the python server)
+   ex:  fetch('http://192.168.1.1811:5000/toggle')
+
+### 4. Make sure flask_cors is imported and installed (should already be done)
+ 
