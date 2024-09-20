@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,33 +14,38 @@
 
         /* making the images similar size */
         img {
-            width: 100px; 
-            height: auto; 
+            width: 100px;
+            height: auto;
             margin: 20px;
 
             /* Make the images clickable (on/off switch) */
-            cursor: pointer; 
-            display: inline-block; 
+            cursor: pointer;
+            display: inline-block;
         }
 
-         /* Make the lightbulb image non-clickable (cursor is normal when hovering over) */
+        /* Make the lightbulb image non-clickable (cursor is normal when hovering over) */
         #lightStatus {
             cursor: default;
         }
     </style>
 </head>
+
 <body>
     <h1>Control the LED and Switch</h1>
 
     <div class="status">
         <!-- Switch images (when clicked changes image), clickable -->
-        <img id="switchStatus" src="off.jpg" alt="Switch is off" onclick="toggleSwitch()">
+        <img id="switchStatus" src="switch_off.png" alt="Switch is off" onclick="toggleSwitch()">
         <!-- Lightbulb image, non-clickable -->
-        <img id="lightStatus" src="light_off.jpg" alt="LED is off">
+        <img id="lightStatus" src="light_off.png" alt="LED is off">
         <p id="statusText">LED is OFF</p>
     </div>
 
     <script>
+        window.addEventListener("load", function () {
+            changeBackground('#696969'); // Set initial background to gray
+            fetchInitialStatus(); // Fetch initial LED status
+        });
 
         /* function to switch image */
         function toggleSwitch() {
@@ -56,19 +62,28 @@
 
                     // Update images and text based on the LED status
                     if (status === "on") {
-                        switchImg.src = "on.jpg";
-                        lightImg.src = "light_on.jpg";
+                        switchImg.src = "switch_on.png";
+                        lightImg.src = "light_on.png";
                         text.innerText = "LED is ON";
+                        changeBackground('#FFFFFF');
                     } else {
-                        switchImg.src = "off.jpg";
-                        lightImg.src = "light_off.jpg";
+                        switchImg.src = "switch_off.png";
+                        lightImg.src = "light_off.png";
                         text.innerText = "LED is OFF";
+                        changeBackground('#696969');
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
                 });
         }
+
+        function changeBackground(color) {
+            document.body.style.background = color;
+        }
+        //window.addEventListener("load", function () { changeBackground('#696969') });
+
     </script>
 </body>
+
 </html>
