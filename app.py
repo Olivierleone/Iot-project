@@ -1,10 +1,10 @@
 from flask import Flask, jsonify
 import RPi.GPIO as GPIO
 
-# Import CORS (since live server and flask run on different ip addresses)
+# Import CORS (since live server and flask run on different ip addresses and port numbers)
 from flask_cors import CORS  
 
-# Set up GPIO for the LED (make sure to select right ip address)
+# Set up GPIO for the LED 
 LED_PIN = 18  # GPIO 18
 
 # Use BCM GPIO numbering
@@ -16,17 +16,21 @@ GPIO.setup(LED_PIN, GPIO.OUT)
  # Start with the LED off
 GPIO.output(LED_PIN, GPIO.LOW) 
 
-# Enable CORS for the Flask app
+# Enable CORS for the Flask app(if code not included it wont be able to fun the server)
 app = Flask(__name__)
 CORS(app)  
 
 # Track the LED status
 led_status = "off"
 
+#registers a new URL endpoint (/toggle) that the Flask application will respond to.
 @app.route('/toggle', methods=['GET'])
 def toggle_led():
+
+    # Access the global variable led_status to track the LED state
     global led_status
     if led_status == "off":
+        
          # Turn the LED on
         GPIO.output(LED_PIN, GPIO.HIGH) 
         led_status = "on"

@@ -1,89 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IoT LED Dashboard</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 50px;
+      }
 
-        /* making the images similar size */
-        img {
-            width: 100px;
-            height: auto;
-            margin: 20px;
+      /* making the images similar size */
+      img {
+        width: 100px;
+        height: auto;
+        margin: 20px;
 
-            /* Make the images clickable (on/off switch) */
-            cursor: pointer;
-            display: inline-block;
-        }
+        /* Make the images clickable (on/off switch) */
+        cursor: pointer;
+        display: inline-block;
+      }
 
-        /* Make the lightbulb image non-clickable (cursor is normal when hovering over) */
-        #lightStatus {
-            cursor: default;
-        }
+      /* Make the lightbulb image non-clickable (cursor is normal when hovering over) */
+      #lightStatus {
+        cursor: default;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <h1>Control the LED and Switch</h1>
 
     <div class="status">
-        <!-- Switch images (when clicked changes image), clickable -->
-        <img id="switchStatus" src="switch_off.png" alt="Switch is off" onclick="toggleSwitch()">
-        <!-- Lightbulb image, non-clickable -->
-        <img id="lightStatus" src="light_off.png" alt="LED is off">
-        <p id="statusText">LED is OFF</p>
+      <!-- Switch images (when clicked changes image), clickable -->
+      <img
+        id="switchStatus"
+        src="switch_off.png"
+        alt="Switch is off"
+        onclick="toggleSwitch()"
+      />
+
+      <!-- Lightbulb image, non-clickable -->
+      <img id="lightStatus" src="light_off.png" alt="LED is off" />
+      <p id="statusText">LED is OFF</p>
     </div>
 
     <script>
-        window.addEventListener("load", function () {
-            changeBackground('#696969'); // Set initial background to gray
-            fetchInitialStatus(); // Fetch initial LED status
-        });
+      window.addEventListener("load", function () {
+        // Set initial background to gray
+        changeBackground("#696969");
 
-        /* function to switch image */
-        function toggleSwitch() {
+        // Fetch initial LED status
+        fetchInitialStatus();
+      });
 
-            // Send request to the backend to toggle the LED state(make sure to use valid ip)
-            fetch('http://192.168.1.1511:5000/toggle')
-                .then(response => response.json())
-                .then(data => {
-                    // Extract the LED status from the backend response
-                    const status = data.status;
-                    const switchImg = document.getElementById("switchStatus");
-                    const lightImg = document.getElementById("lightStatus");
-                    const text = document.getElementById("statusText");
+      /* function to switch image */
+      function toggleSwitch() {
+        // Send request to the backend to toggle the LED state(make sure to use valid ip on machine)
+        fetch("http://192.168.1.1511:5000/toggle")
+          .then((response) => response.json())
+          .then((data) => {
+            // Extract the LED status from the backend response
+            const status = data.status;
+            const switchImg = document.getElementById("switchStatus");
+            const lightImg = document.getElementById("lightStatus");
+            const text = document.getElementById("statusText");
 
-                    // Update images and text based on the LED status
-                    if (status === "on") {
-                        switchImg.src = "switch_on.png";
-                        lightImg.src = "light_on.png";
-                        text.innerText = "LED is ON";
-                        changeBackground('#FFFFFF');
-                    } else {
-                        switchImg.src = "switch_off.png";
-                        lightImg.src = "light_off.png";
-                        text.innerText = "LED is OFF";
-                        changeBackground('#696969');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                });
-        }
+            // Update images and text based on the LED status
+            if (status === "on") {
+              switchImg.src = "switch_on.png";
+              lightImg.src = "light_on.png";
+              text.innerText = "LED is ON";
+              changeBackground("#FFFFFF");
+            } else {
+              switchImg.src = "switch_off.png";
+              lightImg.src = "light_off.png";
+              text.innerText = "LED is OFF";
+              changeBackground("#696969");
+            }
+          })
 
-        function changeBackground(color) {
-            document.body.style.background = color;
-        }
-        //window.addEventListener("load", function () { changeBackground('#696969') });
+          //error detection
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+          });
+      }
 
+      //method to change background colors based on if button is pressed
+      function changeBackground(color) {
+        document.body.style.background = color;
+      }
     </script>
-</body>
-
+  </body>
 </html>
