@@ -1,52 +1,80 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
+import time
 import RPi.GPIO as GPIO
+from Freenove_DHT import DHT
+import smtplib
+from email.mime.text import MIMEText
 
-# Import CORS (since live server and flask run on different ip addresses and port numbers)
-from flask_cors import CORS  
+# Setup the DHT11 pin
+DHTPin = 17  # GPIO 17 for DHT11
 
-# Set up GPIO for the LED 
-LED_PIN = 18  # GPIO 18
+# Setup the LED pin
+LED_PIN = 18
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)  # Suppress GPIO warnings
+GPIO.setup(LED_PIN, GPIO.OUT)
 
-# Use BCM GPIO numbering
-GPIO.setmode(GPIO.BCM)  
-
- # Set pin as output
-GPIO.setup(LED_PIN, GPIO.OUT) 
-
- # Start with the LED off
-GPIO.output(LED_PIN, GPIO.LOW) 
-
-# Enable CORS for the Flask app(if code not included it wont be able to fun the server)
 app = Flask(__name__)
-CORS(app)  
+CORS(app)
 
-# Track the LED status
 led_status = "off"
 
-#registers a new URL endpoint (/toggle) that the Flask application will respond to.
+def send_email(temperature):
+    sender_email = "iot2024vaniercollege@gmail.com"  # your Gmail address(the fake one we are using)
+    receiver_email = "olivierleone.90@gmail.com"  # recipient's email
+    subject = "Temperature Alert"
+    body = f"The current temperature is {temperature:.2f}°C. Would you like to turn on the fan?"
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(sender_email, "rncz xybc adhk ljbq") #App Password here
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            print("Email sent successfully")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
 @app.route('/toggle', methods=['GET'])
 def toggle_led():
-
-    # Access the global variable led_status to track the LED state
     global led_status
     if led_status == "off":
-        
-         # Turn the LED on
-        GPIO.output(LED_PIN, GPIO.HIGH) 
+        GPIO.output(LED_PIN, GPIO.HIGH)
         led_status = "on"
     else:
-         # Turn the LED off
-        GPIO.output(LED_PIN, GPIO.LOW) 
+        GPIO.output(LED_PIN, GPIO.LOW)
         led_status = "off"
-
-    # returns the status in json format 
     return jsonify({"status": led_status})
 
-# Start the Flask application on all available IP addresses (0.0.0.0) and port 5000
+@app.route('/sensors', methods=['GET'])
+def get_sensor_data():
+    dht = DHT(DHTPin)
+    
+    # Attempt to read the sensor up to 15 times
+    for i in range(15):
+        chk = dht.readDHT11()
+        if chk == 0:
+            # Successfully read the sensor
+            humidity = dht.getHumidity()
+            temperature = dht.getTemperature()
+            # Check if temperature exceeds 24°C and send an email
+            if temperature > 24:
+                send_email(temperature)
+            return jsonify({"humidity": round(humidity, 2), "temperature": round(temperature, 2)})
+        time.sleep(0.1)
+    
+    # If the reading fails, return an error
+    return jsonify({"error": "Failed to retrieve data from the sensor"}), 500
+
 if __name__ == '__main__':
     try:
         app.run(host='0.0.0.0', port=5000)
     except KeyboardInterrupt:
         pass
     finally:
-        GPIO.cleanup()
+        GPIO.cleanup()  # Clean up GPIO pins on exit

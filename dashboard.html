@@ -1,96 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IoT LED Dashboard</title>
+    <title>IoT Dashboard</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 50px;
-      }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
 
-      /* making the images similar size */
-      img {
-        width: 100px;
-        height: auto;
-        margin: 20px;
+        nav {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
 
-        /* Make the images clickable (on/off switch) */
-        cursor: pointer;
-        display: inline-block;
-      }
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            margin: 0 10px;
+            display: inline-block;
+        }
 
-      /* Make the lightbulb image non-clickable (cursor is normal when hovering over) */
-      #lightStatus {
-        cursor: default;
-      }
+        nav a:hover {
+            background-color: #575757;
+        }
+
+        .tab-content {
+            padding: 20px;
+        }
+
+        .tab-content:not(.active) {
+            display: none;
+        }
+
+        .control-panel, .sensor-panel {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .control-panel img {
+            width: 100px;
+            height: auto;
+            cursor: pointer;
+            margin: 20px;
+        }
+
+        .sensor-panel p {
+            font-size: 20px;
+        }
     </style>
-  </head>
+</head>
+<body>
+    <nav>
+        <a href="#lights" onclick="showTab('lights')">Smart Lights</a>
+        <a href="#sensors" onclick="showTab('sensors')">Humidity/Temperature</a>
+    </nav>
 
-  <body>
-    <h1>Control the LED and Switch</h1>
+    <div id="lights" class="tab-content active">
+        <h1>Smart Light Control</h1>
+        <div class="control-panel">
+            <img id="switchStatus" src="switch_off.png" alt="Switch is off" onclick="toggleSwitch()" />
+            <img id="lightStatus" src="light_off.png" alt="LED is off" />
+            <p id="statusText">LED is OFF</p>
+        </div>
+    </div>
 
-    <div class="status">
-      <!-- Switch images (when clicked changes image), clickable -->
-      <img
-        id="switchStatus"
-        src="switch_off.png"
-        alt="Switch is off"
-        onclick="toggleSwitch()"
-      />
-
-      <!-- Lightbulb image, non-clickable -->
-      <img id="lightStatus" src="light_off.png" alt="LED is off" />
-      <p id="statusText">LED is OFF</p>
+    <div id="sensors" class="tab-content">
+        <h1>Humidity and Temperature Monitoring</h1>
+        <div class="sensor-panel">
+            <p>Humidity: <span id="humidity">--</span>%</p>
+            <p>Temperature: <span id="temperature">--</span>°C</p>
+        </div>
     </div>
 
     <script>
-      window.addEventListener("load", function () {
-        // Set initial background to gray
-        changeBackground("#696969");
+        window.addEventListener("load", function () {
+            fetchSensorData(); // Load sensor data on start
+            setInterval(fetchSensorData, 5000); // Update every 5 seconds
+        });
 
-        // Fetch initial LED status
-        fetchInitialStatus();
-      });
+        function toggleSwitch() {
+            fetch("http://192.168.2.223:5000/toggle")
+                .then((response) => response.json())
+                .then((data) => {
+                    const status = data.status;
+                    const switchImg = document.getElementById("switchStatus");
+                    const lightImg = document.getElementById("lightStatus");
+                    const text = document.getElementById("statusText");
 
-      /* function to switch image */
-      function toggleSwitch() {
-        // Send request to the backend to toggle the LED state(make sure to use valid ip on machine)
-        fetch("http://192.168.1.1511:5000/toggle")
-          .then((response) => response.json())
-          .then((data) => {
-            // Extract the LED status from the backend response
-            const status = data.status;
-            const switchImg = document.getElementById("switchStatus");
-            const lightImg = document.getElementById("lightStatus");
-            const text = document.getElementById("statusText");
+                    if (status === "on") {
+                        switchImg.src = "switch_on.png";
+                        lightImg.src = "light_on.png";
+                        text.innerText = "LED is ON";
+                        changeBackground("#FFFFFF");
+                    } else {
+                        switchImg.src = "switch_off.png";
+                        lightImg.src = "light_off.png";
+                        text.innerText = "LED is OFF";
+                        changeBackground("#696969");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching data:", error);
+                });
+        }
 
-            // Update images and text based on the LED status
-            if (status === "on") {
-              switchImg.src = "switch_on.png";
-              lightImg.src = "light_on.png";
-              text.innerText = "LED is ON";
-              changeBackground("#FFFFFF");
-            } else {
-              switchImg.src = "switch_off.png";
-              lightImg.src = "light_off.png";
-              text.innerText = "LED is OFF";
-              changeBackground("#696969");
-            }
-          })
+        function changeBackground(color) {
+            document.body.style.background = color;
+        }
 
-          //error detection
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-          });
-      }
+        function fetchSensorData() {
+            fetch("http://192.168.2.223:5000/sensors")
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.error) {
+                        console.error(data.error);
+                        document.getElementById("humidity").innerText = "Error";
+                        document.getElementById("temperature").innerText = "Error";
+                    } else {
+                        document.getElementById("humidity").innerText = data.humidity;
+                        document.getElementById("temperature").innerText = data.temperature;
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching sensor data:", error);
+                });
+        }
 
-      //method to change background colors based on if button is pressed
-      function changeBackground(color) {
-        document.body.style.background = color;
-      }
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll(".tab-content");
+            tabs.forEach((tab) => {
+                tab.classList.remove("active");
+            });
+            document.getElementById(tabName).classList.add("active");
+        }
     </script>
-  </body>
+</body>
 </html>
