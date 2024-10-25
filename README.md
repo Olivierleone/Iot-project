@@ -29,7 +29,7 @@ Second phase of our IoT project
 
 ## Setup Instructions
 
-### 1. Configure SMTP Server
+### 1. Configure SMTP Server(Should already be done (do once)
 
 1. Open your `app.py` file.
 2. Ensure you have the following SMTP settings configured:
