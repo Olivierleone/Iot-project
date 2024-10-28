@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IoT Dashboard</title>
-    <link rel="stylesheet" href="css/styles.css" /> <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.3.914/styles/kendo.common-material.min.css" />
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.3.914/styles/kendo.material.min.css" />
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2016.3.914/styles/kendo.material.mobile.min.css" />
+    
 </head>
 <body>
     <nav>
@@ -27,12 +31,31 @@
             <p>Humidity: <span id="humidity">--</span>%</p>
             <p>Temperature: <span id="temperature">--</span>°C</p>
         </div>
+        <div id="gauge-container">
+            <div id="humidityGauge"></div>
+            <div id="temperatureGauge"></div>
+        </div>
+
+
+        <!-- Fan display -->
+       <div class="ceiling-container">
+    <div class="ceiling-fan horizontal left"></div>
+    <div class="ceiling-fan horizontal right"></div>
+    <div class="ceiling-fan vertical rotated top"></div>
+    <div class="ceiling-fan vertical rotated bottom"></div>
+</div>
     </div>
 
+    <script src="//kendo.cdn.telerik.com/2016.3.914/js/jquery.min.js"></script>
+    <script src="//kendo.cdn.telerik.com/2016.3.914/js/kendo.all.min.js"></script>
+    
     <script>
+        let isFanActive = false; // Track fan status
+
         window.addEventListener("load", function () {
-            fetchSensorData(); // Load sensor data on start
-            setInterval(fetchSensorData, 5000); // Update every 5 seconds
+            createGauges();
+            fetchSensorData();
+            setInterval(fetchSensorData, 5000);
         });
 
         function toggleSwitch() {
@@ -76,6 +99,7 @@
                     } else {
                         document.getElementById("humidity").innerText = data.humidity;
                         document.getElementById("temperature").innerText = data.temperature;
+                        updateGauges(data.temperature, data.humidity);
                     }
                 })
                 .catch((error) => {
@@ -89,6 +113,93 @@
                 tab.classList.remove("active");
             });
             document.getElementById(tabName).classList.add("active");
+        }
+
+        function createGauges() {
+            // Create Temperature Gauge
+            $("#temperatureGauge").kendoRadialGauge({
+                pointer: [{
+                    value: 0,
+                    color: "#c20000",
+                    cap: { size: 0.15 }
+                }],
+                scale: {
+                    minorUnit: 5,
+                    startAngle: -30,
+                    endAngle: 210,
+                    min: -20,
+                    max: 50,
+                    labels: {
+                        template: "#= value # °C"
+                    },
+                    ranges: [
+                        { from: -20, to: 0, color: "#00BFFF" },
+                        { from: 0, to: 25, color: "#FF7A00" },
+                        { from: 25, to: 50, color: "#FF4500" }
+                    ]
+                }
+            });
+
+            // Create Humidity Gauge
+            $("#humidityGauge").kendoRadialGauge({
+                pointer: [{
+                    value: 0,
+                    color: "#007acc",
+                    cap: { size: 0.15 }
+                }],
+                scale: {
+                    minorUnit: 5,
+                    startAngle: -30,
+                    endAngle: 210,
+                    min: 0,
+                    max: 100,
+                    labels: {
+                        template: "#= value # %"
+                    },
+                    ranges: [
+                        { from: 0, to: 30, color: "#00BFFF" },
+                        { from: 30, to: 60, color: "#FF7A00" },
+                        { from: 60, to: 100, color: "#FF4500" }
+                    ]
+                }
+            });
+        }
+
+        function updateGauges(temperature, humidity) {
+            const temperatureGauge = $("#temperatureGauge").data("kendoRadialGauge");
+            const humidityGauge = $("#humidityGauge").data("kendoRadialGauge");
+
+            if (temperatureGauge) {
+                temperatureGauge.value(temperature);
+            } else {
+                console.error("Temperature gauge not initialized");
+            }
+
+            if (humidityGauge) {
+                humidityGauge.value(humidity);
+            } else {
+                console.error("Humidity gauge not initialized");
+            }
+        }
+
+        // Function to activate fan
+        function activateFan() {
+            isFanActive = true;
+            const fanDiv = document.getElementById("fan");
+            fanDiv.style.display = "block"; // Show the fan
+            fanDiv.classList.add("spin"); // Start spinning
+
+            // Stop the fan after 10 seconds
+            setTimeout(() => {
+                deactivateFan();
+            }, 10000);
+        }
+
+        function deactivateFan() {
+            isFanActive = false;
+            const fanDiv = document.getElementById("fan");
+            fanDiv.classList.remove("spin"); // Stop spinning
+            // Keep the fan displayed but not spinning
         }
     </script>
 </body>

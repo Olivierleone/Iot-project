@@ -26,7 +26,7 @@ GPIO.setup(MOTOR3_PIN, GPIO.OUT)
 
 app = Flask(__name__)
 CORS(app)
-
+motor_active = False
 led_status = "off"
 last_email_time = datetime.now() - timedelta(minutes=1)
 
@@ -37,6 +37,8 @@ EMAIL_ACCOUNT = "iot2024vaniercollege@gmail.com"
 EMAIL_PASSWORD = "rncz xybc adhk ljbq"  # App-specific password for email access
 
 def activate_motor_for_duration(duration=10):
+    global motor_active
+    motor_active = True
     GPIO.output(MOTOR1_PIN, GPIO.HIGH)  # Enable motor
     GPIO.output(MOTOR2_PIN, GPIO.HIGH)  # Start motor
     GPIO.output(MOTOR3_PIN, GPIO.LOW)   # Set direction
@@ -44,12 +46,17 @@ def activate_motor_for_duration(duration=10):
     GPIO.output(MOTOR1_PIN, GPIO.LOW)   # Disable motor
     GPIO.output(MOTOR2_PIN, GPIO.LOW)
     GPIO.output(MOTOR3_PIN, GPIO.LOW)
+    motor_active = False 
+
+@app.route('/motor_status', methods=['GET'])
+def get_motor_status():
+    return jsonify({"motor_active": motor_active})
 
 # Function to send temperature alert email
 def send_email(temperature):
     global last_email_time
-    if datetime.now() - last_email_time < timedelta(minutes=1):
-        print("Skipping email - sent less than a minute ago")
+    if datetime.now() - last_email_time < timedelta(minutes=2):
+        print("Skipping email - sent less than two minutes ago")
         return
 
     sender_email = EMAIL_ACCOUNT
@@ -134,4 +141,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
     finally:
-        GPIO.cleanup()  # Clean up GPIO pins on exit
+        GPIO.cleanup()
