@@ -27,7 +27,7 @@ First phase of our IOT project
 # Phase 2
 Second phase of our IoT project
 ## Setup Instructions
-### 1. Configure SMTP Server
+### 1. Configure SMTP Server (do only once)
 1. Open your `app.py` file.
 2. Ensure you have the following SMTP settings configured:
    - **Sender Email**: Your email address that will send notifications.
