@@ -23,6 +23,7 @@ First phase of our IOT project
 
 ### 4. Make sure flask_cors is imported and installed (should already be done)
 
+
 # Phase 2
 Second phase of our IoT project
 ## Setup Instructions
