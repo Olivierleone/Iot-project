@@ -64,125 +64,15 @@ nav a:hover {
     margin: 10px; /* Add margin around gauges */
 }
 
-.spin {
-    animation: spin 1s linear infinite; /* Adjust speed as needed */
+.fan-container {
+    display: flex;
+    justify-content: center;
+    align-items: first baseline;
+    height: 200px; /* Adjust the height as needed */
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+#fanStatus {
+    width: 600px; /* Set a desired width for scaling */
+    height: auto; /* Maintains aspect ratio */
 }
 
-.ceiling-container {
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    position: relative;
-    display: inline-block;
-    animation: spin 6ms linear infinite;
-}
-
-.ceiling-container:after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    border-radius: 50%;
-    width: 70px;
-    height: 70px;
-    margin-left: -35px;
-    margin-top: -35px;
-    background: #444;
-    box-shadow: inset 0 0px 0px 8px #444444, inset 0 1px 5px 22px #383838;
-}
-
-.ceiling-fan {
-    display: block;
-    background: #ccc;
-    border-radius: 5px;
-    position: absolute;
-    box-shadow: inset 1px 1px 40px #555;
-}
-
-.ceiling-fan:after {
-    content: "";
-    position: absolute;
-    background: #666;
-    display: block;
-}
-
-.ceiling-fan.horizontal {
-    width: auto;
-    height: 50px;
-    top: 50%;
-    margin-top: -25px;
-    transform: skewX(20deg);
-}
-
-.ceiling-fan.horizontal:after {
-    top: 25%;
-    width: 15px;
-    height: 50%;
-}
-
-.ceiling-fan.vertical {
-    width: 50px;
-    height: auto;
-    left: 50%;
-    margin-left: -25px;
-    transform: skewY(20deg);
-}
-
-.ceiling-fan.vertical:after {
-    height: 15px;
-    width: 50%;
-    margin-left: 25%;
-}
-
-.ceiling-fan.left {
-    left: 0;
-    right: 50%;
-    margin-right: 45px;
-    border-radius: 50% 15px 15px 50%;
-}
-
-.ceiling-fan.left:after {
-    left: 100%;
-}
-
-.ceiling-fan.right {
-    right: 0;
-    left: 50%;
-    margin-left: 45px;
-    border-radius: 15px 50% 50% 15%;
-}
-
-.ceiling-fan.right:after {
-    right: 100%;
-}
-
-.ceiling-fan.top {
-    top: 0;
-    bottom: 50%;
-    margin-bottom: 45px;
-    border-radius: 50% 50% 15px 15px;
-}
-
-.ceiling-fan.top:after {
-    top: 100%;
-}
-
-.ceiling-fan.bottom {
-    top: 50%;
-    bottom: 0;
-    margin-top: 45px;
-    border-radius: 15px 15px 50% 50%;
-}
-
-.ceiling-fan.bottom:after {
-    bottom: 100%;
-}

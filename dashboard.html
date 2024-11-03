@@ -35,31 +35,36 @@
             <div id="humidityGauge"></div>
             <div id="temperatureGauge"></div>
         </div>
+        <div class="fan-container">
+            <img id="fanStatus" src="fan_table_off.png" alt="Fan is off" />
+        </div>
+        
 
-
-        <!-- Fan display -->
-       <div class="ceiling-container">
-    <div class="ceiling-fan horizontal left"></div>
-    <div class="ceiling-fan horizontal right"></div>
-    <div class="ceiling-fan vertical rotated top"></div>
-    <div class="ceiling-fan vertical rotated bottom"></div>
-</div>
     </div>
 
     <script src="//kendo.cdn.telerik.com/2016.3.914/js/jquery.min.js"></script>
     <script src="//kendo.cdn.telerik.com/2016.3.914/js/kendo.all.min.js"></script>
     
     <script>
-        let isFanActive = false; // Track fan status
+        
+        // Track fan status
+        let isFanActive = false; 
 
         window.addEventListener("load", function () {
             createGauges();
             fetchSensorData();
+
+            //fetch the sensor data each 5 secs (prevent overload in terminal)
             setInterval(fetchSensorData, 5000);
+
+            // Check motor status every 2 seconds
+            setInterval(checkMotorStatus, 2000); 
+
         });
 
+        // Function to toggle the LED switch and update the UI based on the current status
         function toggleSwitch() {
-            fetch("http://192.168.2.223:5000/toggle")
+            fetch("http://127.0.0.1:5000/toggle") // fill in with ip using ifconfig
                 .then((response) => response.json())
                 .then((data) => {
                     const status = data.status;
@@ -84,12 +89,15 @@
                 });
         }
 
+        //changes background color
         function changeBackground(color) {
             document.body.style.background = color;
         }
 
+
+        // Function to fetch sensor data (temperature and humidity) from the server
         function fetchSensorData() {
-            fetch("http://192.168.2.223:5000/sensors")
+            fetch("http://127.0.0.1:5000/sensors") // fill in with ip using ifconfig
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.error) {
@@ -115,6 +123,8 @@
             document.getElementById(tabName).classList.add("active");
         }
 
+
+        // Function to create gauges for displaying temperature and humidity
         function createGauges() {
             // Create Temperature Gauge
             $("#temperatureGauge").kendoRadialGauge({
@@ -165,6 +175,7 @@
             });
         }
 
+        // Function to update the values of the temperature and humidity gauges
         function updateGauges(temperature, humidity) {
             const temperatureGauge = $("#temperatureGauge").data("kendoRadialGauge");
             const humidityGauge = $("#humidityGauge").data("kendoRadialGauge");
@@ -182,25 +193,23 @@
             }
         }
 
-        // Function to activate fan
-        function activateFan() {
-            isFanActive = true;
-            const fanDiv = document.getElementById("fan");
-            fanDiv.style.display = "block"; // Show the fan
-            fanDiv.classList.add("spin"); // Start spinning
+        
+        function checkMotorStatus() {
+            fetch("http://127.0.0.1:5000/motor_status")
+                .then((response) => response.json())
+                .then((data) => {
+            const fanImg = document.getElementById("fanStatus");
+            if (data.motor_active) {
+                fanImg.src = "fan_table_on.gif"; // Image showing fan spinning (used for animation for fan spinning)
+            } else {
+                fanImg.src = "fan_table_off.png"; // Image showing fan off
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching motor status:", error);
+        });
+}
 
-            // Stop the fan after 10 seconds
-            setTimeout(() => {
-                deactivateFan();
-            }, 10000);
-        }
-
-        function deactivateFan() {
-            isFanActive = false;
-            const fanDiv = document.getElementById("fan");
-            fanDiv.classList.remove("spin"); // Stop spinning
-            // Keep the fan displayed but not spinning
-        }
     </script>
 </body>
 </html>
