@@ -76,3 +76,105 @@ nav a:hover {
     height: auto; /* Maintains aspect ratio */
 }
 
+/* Light Intensity Panel Centering */
+.light-intensity-panel {
+    display: flex;
+    flex-direction: column;  /* Stack elements vertically */
+    align-items: center;     /* Center items horizontally */
+    justify-content: center; /* Center items vertically within container */
+    padding: 20px;
+    margin: 0 auto;          /* Center panel within its parent */
+    width: 80%;              /* Optional width for a balanced look */
+    max-width: 600px;        /* Max width for responsive design */
+    background-color: #fff;  /* Background color for better visibility */
+    border-radius: 8px;      /* Rounded corners for a modern look */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.light-intensity-panel h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.light-intensity-panel p {
+    font-size: 18px;
+    color: #555;
+    margin: 10px 0;
+}
+
+.light-intensity-panel button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff; /* Button color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.light-intensity-panel button:hover {
+    background-color: #0056b3;
+}
+
+#lightIntensityGauge {
+    margin-top: 20px;
+    width: 100%;  /* Full width inside panel */
+    max-width: 250px; /* Max width for balanced gauge size */
+    height: 250px;
+}
+
+/* Light Intensity Slider Style */
+.gauge-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(to right, #00FF00, #FF7A00, #FF0000);
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+}
+
+input[type="range"]:hover {
+    background: linear-gradient(to right, #00FF00, #FFFF00, #FF7A00);
+}
+
+input[type="range"]:focus {
+    box-shadow: 0 0 10px #00FF00; /* Green glow on focus */
+}
+
+/* Slider Thumb (Handle) */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: #FF0000;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background-color: #FF0000;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+    background-color: #FF7A00; /* Change color when the slider is being used */
+}
+
+input[type="range"]:active::-moz-range-thumb {
+    background-color: #FF7A00;
+}

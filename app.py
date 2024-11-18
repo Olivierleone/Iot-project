@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 import time
 import imaplib
 import email
+from datetime import datetime
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from flask import Flask, jsonify
@@ -10,6 +11,7 @@ from flask_cors import CORS
 from Freenove_DHT import DHT
 import threading
 import smtplib
+import paho.mqtt.client as mqtt
 
 # GPIO setup
 
@@ -18,6 +20,15 @@ DHTPin = 17
 
 #GPIO pin for the LED
 LED_PIN = 18
+
+email_sent = False
+
+# MQTT setup
+MQTT_BROKER = "172.20.10.4"  # Set to your Raspberry Pi IP if needed
+MQTT_PORT = 1883  # Default MQTT port
+MQTT_TOPIC = "home/light" 
+
+light_intensity_value = 0
 
 #GPIO pins for motor control
  # Enable pin for the motor (MOTOR1)
@@ -70,6 +81,84 @@ SMTP_SERVER = "smtp.gmail.com"
 EMAIL_ACCOUNT = "iot2024vaniercollege@gmail.com"
 EMAIL_PASSWORD = "rncz xybc adhk ljbq"  # App-specific password for email access
 
+def on_connect(client, userdata, flags, rc):
+    client.subscribe(MQTT_TOPIC)
+
+def on_message(client, userdata, msg):
+    global light_intensity_value, led_status, email_sent
+    light_intensity_value = int(msg.payload.decode())  # Get the light intensity value from MQTT message
+
+    # Check if light intensity is below 400
+    if light_intensity_value < 400:
+        GPIO.output(LED_PIN, GPIO.HIGH)  # Turn on the LED
+        led_status = "on"
+
+          # Send email if it hasn't been sent already
+        if not email_sent:
+            send_light_status_email()  # Call the function to send an email
+            
+    else:
+        GPIO.output(LED_PIN, GPIO.LOW)  # Turn off the LED
+        led_status = "off"
+        email_sent = False
+
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+mqtt_client.loop_start()
+
+
+@app.route('/light_intensity', methods=['GET'])
+def light_intensity():
+    # Ensure the data from MQTT is available
+    if light_intensity_value is None:
+        return jsonify({"error": "Data not yet received from MQTT"}), 500
+
+    # Logging to verify status
+    print(f"LED status: {led_status}")
+
+    global email_sent
+    email_sent = email_sent if email_sent is not None else False
+
+    return jsonify({
+        "light_intensity": light_intensity_value,
+        "led_status": led_status,
+        "email_sent": email_sent
+    })
+
+def send_light_status_email():
+    global last_email_time, email_sent, led_status
+
+    # Only send an email if the LED is on and at least 1 minute has passed since the last email
+    if led_status == "on" and datetime.now() - last_email_time >= timedelta(minutes=1):
+        sender_email = EMAIL_ACCOUNT
+        receiver_email = "olivier.leone90@gmail.com"  # Change to the recipient's email address
+        subject = "Light Status Update"
+        body = f"The light is on at {datetime.now().strftime('%H:%M')}."
+
+        msg = MIMEText(body)
+        msg["Subject"] = subject
+        msg["From"] = sender_email
+        msg["To"] = receiver_email
+
+        try:
+            with smtplib.SMTP(SMTP_SERVER, 587) as server:
+                server.starttls()
+                server.login(sender_email, EMAIL_PASSWORD)
+                server.sendmail(sender_email, receiver_email, msg.as_string())
+                print("Light status email sent successfully.")
+                last_email_time = datetime.now()  # Update the timestamp for the last email
+                email_sent = True  # Mark the email as sent
+        except Exception as e:
+            print(f"Failed to send email: {e}")
+       
+
+
+def send_light_status_email_periodically():
+    while True:
+        send_light_status_email()
+        time.sleep(60)  # Wait for 1 minute before sending the next email
 
 # Activate the motor for a specified duration (default 10 seconds) and then disable it
 def activate_motor_for_duration(duration=10):
@@ -105,7 +194,7 @@ def cleanup_processed_replies():
 
 # Function to send temperature alert email
 def send_email(temperature):
-    global last_email_time
+    global last_email_time,email_sent
 
     #preventing email flooding by limiting to 1 email sent per 2 minutes
     if datetime.now() - last_email_time < timedelta(minutes=2):
@@ -189,9 +278,6 @@ def check_email_reply():
         print(f"Error checking email: {e}")
 
 
-
-     
-
 # Function to run email checking in the background
 def start_email_checker():
     while True:
@@ -201,6 +287,7 @@ def start_email_checker():
 # Start background threads for continuous email checking and cleanup of processed replies
 threading.Thread(target=start_email_checker, daemon=True).start()
 threading.Thread(target=cleanup_processed_replies, daemon=True).start()
+threading.Thread(target=send_light_status_email_periodically, daemon=True).start()
 
 if __name__ == '__main__':
     try:

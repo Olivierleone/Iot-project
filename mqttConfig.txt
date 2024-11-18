@@ -1,0 +1,65 @@
+#include <WiFi.h>
+#include <PubSubClient.h>
+
+// Replace these with your own Wi-Fi credentials
+const char* ssid = "iPhone";
+const char* password = "12345678";
+
+// MQTT Broker information (use Raspberry Pi IP address)
+const char* mqtt_server = "172.20.10.4";  // Replace with your Raspberry Pi IP address
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+const int photoresistorPin = 34;  // Use the correct analog pin (GPIO34)
+const int ledPin = 27;  // LED pin
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(ledPin, OUTPUT);
+  
+  // Set the photoresistor pin as input (no need to do this for analog pins)
+  
+  setup_wifi();
+  client.setServer(mqtt_server, 1883);
+}
+
+void setup_wifi() {
+  delay(10);
+  Serial.println();
+  Serial.print("Connecting to WiFi...");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void reconnect() {
+  while (!client.connected()) {
+    if (client.connect("ESP32_Client")) {
+      Serial.println("Connected to MQTT Broker");
+    } else {
+      delay(5000);
+    }
+  }
+}
+
+void loop() {
+  if (!client.connected()) {
+    reconnect();
+  }
+  client.loop();
+  
+  // Read the light intensity from the photoresistor
+  int lightLevel = analogRead(photoresistorPin);  // Use analogRead() to get the value
+  String lightMessage = String(lightLevel);
+
+  // Publish the light level to the topic
+  client.publish("home/light", lightMessage.c_str());
+
+  delay(2000);  // Delay between readings
+}

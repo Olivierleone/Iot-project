@@ -14,6 +14,7 @@
     <nav>
         <a href="#lights" onclick="showTab('lights')">Smart Lights</a>
         <a href="#sensors" onclick="showTab('sensors')">Humidity/Temperature</a>
+        <a href="#light-control" onclick="showTab('light-control')">Light Intensity</a> 
     </nav>
 
     <div id="lights" class="tab-content active">
@@ -24,6 +25,23 @@
             <p id="statusText">LED is OFF</p>
         </div>
     </div>
+
+    <div id="light-control" class="tab-content">
+        <div class="light-intensity-panel">
+            <h2>Light Intensity</h2>
+            <p>Light Intensity: <span id="lightIntensity">--</span></p>
+            <p id="lightStatusMessage" class="status">LED status: --</p>
+            <p id="emailStatusMessage" class="status">Email status: --</p>
+           
+            <div class="slider-container"></div>
+                <input type="range" id="lightIntensitySlider" min="0" max="1000" value="500" step="10" disabled>
+                <div class="slider-value">
+                    <span>Light Intensity: <span id="sliderValue">500</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 
     <div id="sensors" class="tab-content">
         <h1>Humidity and Temperature Monitoring</h1>
@@ -46,7 +64,77 @@
     <script src="//kendo.cdn.telerik.com/2016.3.914/js/kendo.all.min.js"></script>
     
     <script>
+
+        // Update the slider value on input change
+const slider = document.getElementById("lightIntensitySlider");
+const sliderValue = document.getElementById("sliderValue");
+
+// Update the displayed value when the slider is moved
+slider.addEventListener("input", function() {
+    sliderValue.textContent = slider.value;
+});
+
+// update the light intensity gauge as the slider moves
+slider.addEventListener("input", function() {
+    const lightIntensity = slider.value;
+    const lightIntensityGauge = $("#lightIntensityGauge").data("kendoLinearGauge");
+    
+    if (lightIntensityGauge) {
+        lightIntensityGauge.value(lightIntensity); // Update the gauge with the slider value
+    }
+});
+
+
         
+        function fetchLightIntensity() {
+    fetch("http://172.20.10.4:5000/light_intensity")  // Ensure this URL is correct
+        .then(response => response.json())
+        .then(data => {
+            console.log("Light Intensity:", data.light_intensity);
+
+            // Update the UI with the fetched light intensity value
+            document.getElementById("lightIntensity").innerText = data.light_intensity || "--";
+            document.getElementById("sliderValue").textContent = data.light_intensity || "--";
+
+            // Set the slider value, but make sure the slider is disabled
+            const slider = document.getElementById("lightIntensitySlider");
+            slider.value = data.light_intensity || 500; // Default to 500 if no value
+
+            // Update the LED status text
+            if (data.led_status !== undefined) {
+                document.getElementById("lightStatusMessage").innerText = data.led_status === "on" ? "LED is ON" : "LED is OFF";
+            } else {
+                console.error("LED status data is missing");
+            }
+
+            // Update email status message
+            if (data.email_sent !== undefined) {
+                document.getElementById("emailStatusMessage").innerText = data.email_sent ? "Email sent" : "No email sent";
+            } else {
+                console.error("Email status data is missing");
+            }
+
+            // Optionally, update the light intensity gauge
+            const lightIntensityGauge = $("#lightIntensityGauge").data("kendoLinearGauge");
+            if (lightIntensityGauge) {
+                lightIntensityGauge.value(data.light_intensity || 0); // Update gauge with the fetched value
+            } else {
+                console.error("Light intensity gauge not initialized");
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching light intensity data:", error);
+        });
+}
+// Fetch light intensity data every 2 seconds
+setInterval(fetchLightIntensity, 1000);
+
+    // Fetch the initial data when the page loads
+    window.addEventListener("load", function () {
+        fetchLightIntensity();
+    });
+
+
         // Track fan status
         let isFanActive = false; 
 
@@ -64,7 +152,7 @@
 
         // Function to toggle the LED switch and update the UI based on the current status
         function toggleSwitch() {
-            fetch("http://127.0.0.1:5000/toggle") // fill in with ip using ifconfig
+            fetch("http://172.20.10.4:5000/toggle") // fill in with ip using ifconfig
                 .then((response) => response.json())
                 .then((data) => {
                     const status = data.status;
@@ -97,7 +185,7 @@
 
         // Function to fetch sensor data (temperature and humidity) from the server
         function fetchSensorData() {
-            fetch("http://127.0.0.1:5000/sensors") // fill in with ip using ifconfig
+            fetch("http://172.20.10.4:5000/sensors") // fill in with ip using ifconfig
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.error) {
@@ -173,29 +261,55 @@
                     ]
                 }
             });
+
+            $("#lightIntensityGauge").kendoLinearGauge({
+                pointer: {
+                    value: 0,
+                    color: "#FFD700"
+                },
+                scale: {
+                    majorUnit: 100,
+                    minorUnit: 10,
+                    min: 0,
+                    max: 1000, 
+                    vertical: true,
+                    ranges: [
+                        { from: 0, to: 400, color: "#00FF00" },
+                        { from: 400, to: 800, color: "#FF7A00" },
+                        { from: 800, to: 1000, color: "#FF0000" }
+                    ]
+                }
+            });
         }
 
         // Function to update the values of the temperature and humidity gauges
         function updateGauges(temperature, humidity) {
             const temperatureGauge = $("#temperatureGauge").data("kendoRadialGauge");
             const humidityGauge = $("#humidityGauge").data("kendoRadialGauge");
+            const lightIntensityGauge = $("#lightIntensityGauge").data("kendoLinearGauge");
 
             if (temperatureGauge) {
-                temperatureGauge.value(temperature);
-            } else {
-                console.error("Temperature gauge not initialized");
-            }
+        temperatureGauge.value(temperature);
+    } else {
+        console.error("Temperature gauge not initialized");
+    }
 
-            if (humidityGauge) {
-                humidityGauge.value(humidity);
-            } else {
-                console.error("Humidity gauge not initialized");
-            }
-        }
+    if (humidityGauge) {
+        humidityGauge.value(humidity);
+    } else {
+        console.error("Humidity gauge not initialized");
+    }
+
+    if (lightIntensityGauge) {
+        lightIntensityGauge.value(lightIntensity);
+    } else {
+        console.error("Light intensity gauge not initialized");
+    }
+}
 
         
         function checkMotorStatus() {
-            fetch("http://127.0.0.1:5000/motor_status")
+            fetch("http://172.20.10.4:5000/motor_status")
                 .then((response) => response.json())
                 .then((data) => {
             const fanImg = document.getElementById("fanStatus");
