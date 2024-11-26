@@ -1,0 +1,513 @@
+
+.fan-container {
+    display: flex;
+    justify-content: center;
+    align-items: first baseline;
+    height: 200px; 
+}
+
+#fanStatus {
+    width: 600px; 
+    height: auto; 
+}
+
+/* Light Intensity Panel Centering */
+.light-intensity-panel {
+    display: flex;
+    flex-direction: column;  /* Stack elements vertically */
+    align-items: center;     /* Center items horizontally */
+    justify-content: center; /* Center items vertically within container */
+    padding: 20px;
+    margin: 0 auto;          /* Center panel within its parent */
+    width: 80%;              /* Optional width for a balanced look */
+    max-width: 600px;        /* Max width for responsive design */
+    background-color: #fff;  /* Background color for better visibility */
+    border-radius: 8px;      /* Rounded corners for a modern look */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.light-intensity-panel h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.light-intensity-panel p {
+    font-size: 18px;
+    color: #555;
+    margin: 10px 0;
+}
+
+.light-intensity-panel button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff; /* Button color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.light-intensity-panel button:hover {
+    background-color: #0056b3;
+}
+
+#lightIntensityGauge {
+    margin-top: 20px;
+    width: 100%;  /* Full width inside panel */
+    max-width: 250px; /* Max width for balanced gauge size */
+    height: 250px;
+}
+
+/* Light Intensity Slider Style */
+.gauge-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(to right, #00FF00, #FF7A00, #FF0000);
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+}
+
+input[type="range"]:hover {
+    background: linear-gradient(to right, #00FF00, #FFFF00, #FF7A00);
+}
+
+input[type="range"]:focus {
+    box-shadow: 0 0 10px #00FF00; /* Green glow on focus */
+}
+
+/* Slider Thumb (Handle) */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: #FF0000;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background-color: #FF0000;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+    background-color: #FF7A00; /* Change color when the slider is being used */
+}
+
+input[type="range"]:active::-moz-range-thumb {
+    background-color: #FF7A00;
+}
+
+
+/* 3D effect for the slider */
+#lightIntensitySlider {
+    width: 80%;
+    height: 20px;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 10px;
+    background: linear-gradient(to right, #00FF00, #FF7A00, #FF0000); /* Gradient colors */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* 3D shadow effect */
+    transition: all 0.3s ease;
+    border: none; 
+    margin: 0; 
+    outline: none; 
+}
+
+#lightIntensitySlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #FFD700; 
+    border: 3px solid #FFD700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#lightIntensitySlider::-moz-range-thumb {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #FFD700;
+    border: 3px solid #FFD700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#lightIntensitySlider:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); /* Focus effect */
+}
+
+/* Remove the slider value text line */
+.slider-value {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+/* Login Container */
+.login-container {
+    background: #fff;
+    color: #333;
+    padding: 30px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+  }
+  
+  .login-container h1 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  
+  .login-container p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  .login-container button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background: #2575fc;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .login-container button:hover {
+    background: #1c5ed6;
+    transform: translateY(-2px);
+  }
+  
+  .login-container button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+  }
+
+  /* Increase size of humidity and temperature gauges */
+#humidityGauge, #temperatureGauge {
+    width: 300px;
+    height: 300px;
+}
+
+/* Circular profile icon */
+.profile-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #007acc;
+    color: white;
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+    font-size: 20px;
+    margin: 20px;
+}
+
+/* Profile Container */
+.profile-container {
+    background-color: #fff;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 15px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hover Effect on Profile */
+.profile-container:hover {
+    transform: scale(1.02);
+}
+
+/* Profile Title */
+h2 {
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Profile Info Section */
+.profile-info {
+    padding: 20px;
+    background-color: #f7f7f7;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Individual Info Item */
+.info-item {
+    margin: 10px 0;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+/* RFID Tag & Preferences */
+#rfidTag, #lightPreference, #tempPreference {
+    font-weight: 600;
+    color: #007bff;
+}
+
+/* Button Styling */
+.back-button button {
+    padding: 12px 25px;
+    background-color: #2575fc;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.back-button button:hover {
+    background-color: #1c5ed6;
+}
+
+.back-button button:active {
+    transform: scale(0.98);
+}
+
+/* Responsive Design Adjustments */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 30px;
+        width: 90%;
+    }
+
+    .profile-info {
+        padding: 15px;
+    }
+
+    .back-button button {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+}
+
+/* General Dashboard Layout */
+.dashboard-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px auto;
+    width: 95%;
+    max-width: 1200px;
+}
+
+/* Sensor and Control Panels */
+.control-panel,
+.sensor-panel {
+    width: 48%;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.control-panel img {
+    width: 120px;
+    height: auto;
+    cursor: pointer;
+    margin: 20px;
+}
+
+.sensor-panel p {
+    font-size: 20px;
+    color: #555;
+}
+
+/* Gauge Layout */
+#gauge-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+
+#temperatureGauge,
+#humidityGauge {
+    width: 300px;
+    height: 300px;
+    margin: 20px;
+}
+
+/* Light Intensity Panel */
+.light-intensity-panel {
+    width: 100%;
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.light-intensity-panel h2 {
+    font-size: 24px;
+    color: #333;
+}
+
+.light-intensity-panel p {
+    font-size: 18px;
+    color: #555;
+}
+
+#lightIntensityGauge {
+    width: 100%;
+    max-width: 250px;
+    height: 250px;
+    margin-top: 20px;
+}
+
+/* Light Intensity Slider */
+.gauge-container {
+    text-align: center;
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(to right, #00FF00, #FF7A00, #FF0000);
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+input[type="range"]::-webkit-slider-thumb,
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background-color: #FF0000;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Fan Status Panel */
+.fan-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#fanStatus {
+    width: 600px;
+    height: auto;
+}
+
+/* Profile Icon */
+.profile-icon {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 30px;
+    cursor: pointer;
+    background-color: #007acc; /* Blue background */
+    color: white;
+    border-radius: 50%;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Section (if included in the dashboard) */
+.profile-container {
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+.dashboard-container {
+    display: flex;
+    justify-content: center; /* Centers the content horizontally */
+    align-items: center;     /* Centers the content vertically */
+    margin: 20px auto;
+    width: 95%;
+    max-width: 1200px;
+    flex-direction: column; /* Stack the panels vertically */
+}
+
+/* Panel Layout */
+.panel {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto; /* Center each panel */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Light Intensity Panel */
+.light-intensity-panel {
+    margin-bottom: 30px; /* Space between panels */
+}
+
+/* Humidity and Temperature Monitoring Panel */
+.panel .sensor-panel {
+    margin-bottom: 30px;
+}
+
+/* Title for the Dashboard */
+.dashboard-title {
+    text-align: center;
+    font-size: 3rem;
+    color: #fff;
+    margin-bottom: 40px;  /* Add more space between title and content */
+}
+/* Ensure gauges are well-aligned */
+#gauge-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Allows wrapping on smaller screens */
+    margin: 20px 0;
+}

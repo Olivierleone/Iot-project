@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    async function checkRFIDLogin() {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/home/rfid-status');
+        const data = await response.json();
+        console.log("Server Response:", data);
+
+        if (data.success && data.rfid_tag) {
+          // Save the RFID tag in sessionStorage
+          sessionStorage.setItem('rfid_tag', data.rfid_tag);  // Assuming `rfid_tag` is sent in the response
+          console.log("RFID tag saved in sessionStorage:", data.rfid_tag);  // Log the RFID tag
+
+
+          alert(data.message); // Show welcome message
+          window.location.href = '/dashboard.html'; // Redirect to the dashboard
+        } else {
+          alert("Invalid RFID tag. Please scan your card and try again."); // Show error or prompt to scan again
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to communicate with the server. Please try again.");
+      }
+    }
+
+    function handleLoginClick() {
+      alert("Please scan your card."); // Prompt user to scan their card
+      checkRFIDLogin(); // Immediately check RFID status after the alert test
+    }
+  </script>
+</head>
+<body>
+  <div class="login-container">
+    <h1>Welcome to IoT Dashboard</h1>
+    <p>Scan your RFID tag to log in.</p>
+    <button onclick="handleLoginClick()">Login</button>
+  </div>
+</body>
+</html>

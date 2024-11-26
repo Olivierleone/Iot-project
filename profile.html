@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Profile</title>
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+    <!-- Profile Container -->
+    <div class="profile-container">
+        <h2>User Profile</h2>
+        <div class="profile-info">
+            <div class="info-item">
+                <strong>RFID Tag:</strong> <span id="rfidTag">--</span>
+            </div>
+            <div class="info-item">
+                <strong>Light Intensity Preference:</strong> <span id="lightPreference">--</span>
+            </div>
+            <div class="info-item">
+                <strong>Temperature Preference:</strong> <span id="tempPreference">--</span> °C
+            </div>
+        </div>
+        <div class="back-button">
+            <button onclick="window.location.href='dashboard.html';">Back to Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch profile data from the backend (using async/await)
+        async function fetchUserProfile() {
+    const rfidTag = sessionStorage.getItem('rfid_tag'); // Get RFID tag from sessionStorage
+
+    if (!rfidTag) {
+        alert("No RFID tag found. Please log in again.");
+        window.location.href = '/index.html';
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/get_user_profile?rfid_tag=${rfidTag}`);
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('rfidTag').innerText = data.rfid_tag;
+            document.getElementById('lightPreference').innerText = data.light_preference;
+            document.getElementById('tempPreference').innerText = data.temp_preference;
+        } else {
+            alert(data.message || "User not found.");
+            window.location.href = '/index.html';
+        }
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        alert("An error occurred. Please try again later.");
+    }
+}
+
+document.addEventListener('DOMContentLoaded', fetchUserProfile);
+    </script>
+</body>
+</html>

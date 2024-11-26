@@ -11,59 +11,94 @@
     
 </head>
 <body>
-    <nav>
-        <a href="#lights" onclick="showTab('lights')">Smart Lights</a>
-        <a href="#sensors" onclick="showTab('sensors')">Humidity/Temperature</a>
-        <a href="#light-control" onclick="showTab('light-control')">Light Intensity</a> 
-    </nav>
-
-    <div id="lights" class="tab-content active">
-        <h1>Smart Light Control</h1>
-        <div class="control-panel">
-            <img id="switchStatus" src="switch_off.png" alt="Switch is off" onclick="toggleSwitch()" />
-            <img id="lightStatus" src="light_off.png" alt="LED is off" />
-            <p id="statusText">LED is OFF</p>
-        </div>
+    <!-- Profile Icon -->
+    <div class="profile-icon" onclick="window.location.href='profile.html';">
+        &#128100; 
     </div>
 
-    <div id="light-control" class="tab-content">
-        <div class="light-intensity-panel">
-            <h2>Light Intensity</h2>
-            <p>Light Intensity: <span id="lightIntensity">--</span></p>
-            <p id="lightStatusMessage" class="status">LED status: --</p>
-            <p id="emailStatusMessage" class="status">Email status: --</p>
-           
-            <div class="slider-container"></div>
-                <input type="range" id="lightIntensitySlider" min="0" max="1000" value="500" step="10" disabled>
-                <div class="slider-value">
-                    <span>Light Intensity: <span id="sliderValue">500</span></span>
+    <!-- Logout Button -->
+<div class="logout-button" onclick="logoutUser()">
+    Logout
+</div>
+  
+    <div class="dashboard-container">
+
+        <h1 class="dashboard-title">IoT Dashboard</h1>
+        <div class="top-panels">
+            <div class="panel light-intensity-panel">
+                <h2>Light Intensity</h2>
+                <p>Light Intensity: <span id="lightIntensity">--</span></p>
+                <p id="lightStatusMessage" class="status">LED status: --</p>
+                <p id="emailStatusMessage" class="status">Email status: --</p>
+                <div class="slider-container">
+                    <input type="range" id="lightIntensitySlider" min="0" max="1000" value="500" step="10" disabled>
+                    <div class="slider-value">
+                        <span>Light Intensity: <span id="sliderValue">500</span></span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    
 
-    <div id="sensors" class="tab-content">
-        <h1>Humidity and Temperature Monitoring</h1>
-        <div class="sensor-panel">
-            <p>Humidity: <span id="humidity">--</span>%</p>
-            <p>Temperature: <span id="temperature">--</span>°C</p>
+            <div class="panel temperature-panel">
+                <h2>Temperature</h2>
+                <p>Temperature: <span id="temperature">--</span>°C</p>
+                <div id="temperatureGauge"></div>
+            </div>
+
+            <div class="panel humidity-panel">
+                <h2>Humidity</h2>
+                <p>Humidity: <span id="humidity">--</span>%</p>
+                <div id="humidityGauge"></div>
+            </div>
         </div>
+
         <div id="gauge-container">
             <div id="humidityGauge"></div>
             <div id="temperatureGauge"></div>
         </div>
-        <div class="fan-container">
-            <img id="fanStatus" src="fan_table_off.png" alt="Fan is off" />
-        </div>
-        
 
+        <div class="panel fan-panel">
+            <h2>Fan Status</h2>
+            <div class="fan-container">
+                <img id="fanStatus" src="fan_table_off.png" alt="Fan is off" />
+            </div>
+        </div>
     </div>
+
 
     <script src="//kendo.cdn.telerik.com/2016.3.914/js/jquery.min.js"></script>
     <script src="//kendo.cdn.telerik.com/2016.3.914/js/kendo.all.min.js"></script>
     
     <script>
+
+function logoutUser() {
+    // Clear RFID tag and other sessionStorage items
+    sessionStorage.clear();
+    
+    
+}
+
+    // Notify the server when the user enters the dashboard
+    function enterDashboard() {
+        fetch('http://127.0.0.1:5000/dashboard', { method: 'POST' });
+    }
+
+     // Notify the server when the user exits the dashboard
+     function exitDashboard() {
+        fetch('http://127.0.0.1:5000/exit_dashboard', { method: 'POST' });
+    }
+
+    window.onload = enterDashboard;
+    window.onbeforeunload = exitDashboard;
+
+        // Fetch RFID tag from sessionStorage and log it
+const rfidTag = sessionStorage.getItem('rfid_tag');
+//console.log("RFID tag from sessionStorage in dashboard:", rfidTag);
+
+//FIX NO LOADING 
+ if (!rfidTag) {
+    // alert("No RFID tag found. Please log in again.");
+     //window.location.href = '/index.html'; // Redirect to login if no RFID tag found
+}
 
         // Update the slider value on input change
 const slider = document.getElementById("lightIntensitySlider");
@@ -85,8 +120,7 @@ slider.addEventListener("input", function() {
 });
 
 
-        
-        function fetchLightIntensity() {
+function fetchLightIntensity() {
     fetch("http://172.20.10.4:5000/light_intensity")  // Ensure this URL is correct
         .then(response => response.json())
         .then(data => {
@@ -259,7 +293,11 @@ setInterval(fetchLightIntensity, 1000);
                         { from: 30, to: 60, color: "#FF7A00" },
                         { from: 60, to: 100, color: "#FF4500" }
                     ]
-                }
+                },
+                size: {
+            width: 10,  // Adjust the size here
+            height: 10  // Adjust the size here
+        }
             });
 
             $("#lightIntensityGauge").kendoLinearGauge({
@@ -278,7 +316,11 @@ setInterval(fetchLightIntensity, 1000);
                         { from: 400, to: 800, color: "#FF7A00" },
                         { from: 800, to: 1000, color: "#FF0000" }
                     ]
-                }
+                },
+                size: {
+            width: 0,  
+            height: 0  
+        }
             });
         }
 

@@ -1,121 +1,357 @@
+/* General Styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-}
-
-nav {
-    background-color: #333;
-    color: white;
-    padding: 10px;
-    text-align: center;
-}
-
-nav a {
-    color: white;
-    padding: 14px 20px;
-    text-decoration: none;
-    margin: 0 10px;
-    display: inline-block;
-}
-
-nav a:hover {
-    background-color: #575757;
-}
-
-.tab-content {
-    padding: 20px;
-}
-
-.tab-content:not(.active) {
-    display: none;
-}
-
-.control-panel,
-.sensor-panel {
-    text-align: center;
-    padding: 50px;
-}
-
-.control-panel img {
-    width: 100px;
-    height: auto;
-    cursor: pointer;
-    margin: 20px;
-}
-
-.sensor-panel p {
-    font-size: 20px;
-}
-
-/* Update gauge container to flex for side-by-side display */
-#gauge-container {
-    display: flex; /* Use flexbox for layout */
-    justify-content: center; /* Center items horizontally */
-    align-items: center; /* Center items vertically */
-    margin: 0 auto;
-}
-
-#temperatureGauge,
-#humidityGauge {
-    width: 250px; /* Set the width of the gauges */
-    height: 250px; /* Set the height of the gauges */
-    margin: 10px; /* Add margin around gauges */
-}
-
-.fan-container {
     display: flex;
     justify-content: center;
-    align-items: first baseline;
-    height: 200px; /* Adjust the height as needed */
-}
-
-#fanStatus {
-    width: 600px; /* Set a desired width for scaling */
-    height: auto; /* Maintains aspect ratio */
-}
-
-/* Light Intensity Panel Centering */
-.light-intensity-panel {
-    display: flex;
-    flex-direction: column;  /* Stack elements vertically */
-    align-items: center;     /* Center items horizontally */
-    justify-content: center; /* Center items vertically within container */
-    padding: 20px;
-    margin: 0 auto;          /* Center panel within its parent */
-    width: 80%;              /* Optional width for a balanced look */
-    max-width: 600px;        /* Max width for responsive design */
-    background-color: #fff;  /* Background color for better visibility */
-    border-radius: 8px;      /* Rounded corners for a modern look */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-}
-
-.light-intensity-panel h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.light-intensity-panel p {
-    font-size: 18px;
-    color: #555;
-    margin: 10px 0;
-}
-
-.light-intensity-panel button {
-    padding: 10px 20px;
-    font-size: 16px;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #6a11cb, #2575fc, #00c6ff, #0072ff);
+    background-size: 400% 400%; /* Makes the gradient larger than the screen */
+   /* animation: gradientFlow 10s ease infinite; /* Animation name, duration, and infinite loop */
     color: #fff;
-    background-color: #007bff; /* Button color */
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+/* Keyframes for the gradient animation */
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.dashboard-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1100px; /* Adjust max width for 27-inch screen */
+    flex-wrap: wrap;
+    margin: 40px auto;
+    padding: 0 20px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Title for the Dashboard */
+.dashboard-title {
+    text-align: center;
+    font-size: 2rem; /* Reduced font size */
+    color: #fff;
+    margin-bottom: 30px;
+    width: 100%;
+    transition: transform 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease;
+}
+
+/* Hover Effect */
+.dashboard-title:hover {
+    transform: scale(1.2) rotate(3deg); /* Slight zoom and rotation */
+    animation: rgb-wave 3s infinite, glow-pulse 1s ease-in-out infinite, bounce 1s ease infinite; /* RGB wave, pulse, and bounce effect */
+}
+
+/* RGB Wave Animation */
+@keyframes rgb-wave {
+    0% {
+        color: rgb(255, 0, 0); /* Red */
+        text-shadow: 0 0 10px rgb(255, 0, 0), 0 0 20px rgb(255, 0, 0), 0 0 30px rgb(255, 0, 0);
+    }
+    25% {
+        color: rgb(0, 255, 0); /* Green */
+        text-shadow: 0 0 10px rgb(0, 255, 0), 0 0 20px rgb(0, 255, 0), 0 0 30px rgb(0, 255, 0);
+    }
+    50% {
+        color: rgb(0, 0, 255); /* Blue */
+        text-shadow: 0 0 10px rgb(0, 0, 255), 0 0 20px rgb(0, 0, 255), 0 0 30px rgb(0, 0, 255);
+    }
+    75% {
+        color: rgb(255, 255, 0); /* Yellow */
+        text-shadow: 0 0 10px rgb(255, 255, 0), 0 0 20px rgb(255, 255, 0), 0 0 30px rgb(255, 255, 0);
+    }
+    100% {
+        color: rgb(255, 0, 0); /* Back to Red */
+        text-shadow: 0 0 10px rgb(255, 0, 0), 0 0 20px rgb(255, 0, 0), 0 0 30px rgb(255, 0, 0);
+    }
+}
+
+/* Glow Pulse Animation */
+@keyframes glow-pulse {
+    0% {
+        filter: brightness(1.2) blur(0px); /* Slight brightness and no blur */
+    }
+    50% {
+        filter: brightness(2) blur(5px); /* Glowing effect */
+    }
+    100% {
+        filter: brightness(1.2) blur(0px); /* Returns to normal */
+    }
+}
+
+/* Bounce Animation */
+@keyframes bounce {
+    0% {
+        transform: translateY(0); /* Start at the normal position */
+    }
+    25% {
+        transform: translateY(-10px); /* Move up */
+    }
+    50% {
+        transform: translateY(0); /* Move back to original position */
+    }
+    75% {
+        transform: translateY(-5px); /* A slight move up */
+    }
+    100% {
+        transform: translateY(0); /* Final position */
+    }
+}
+
+/* Panel Layout */
+.panel {
+    width: 30%; /* Slightly reduced panel width for a better fit */
+    
+  
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    box-sizing: border-box;
+    transition: transform 0.3s ease;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Panel hover effect */
+.panel:hover {
+    transform: translateY(-5px); /* Slight lift effect on hover */
+}
+
+/* Keyframes for panel border animation */
+@keyframes borderAnimation {
+    0% {
+        border-color: #ff7a00;
+    }
+    50% {
+        border-color: #00FF00;
+    }
+    100% {
+        border-color: #FF0000;
+    }
+}
+
+/* Light Intensity Panel */
+.light-intensity-panel {
+    margin-bottom: 30px; /* Space between panels */
+}
+
+#lightIntensityGauge {
+    width: 100%;
+    max-width: 300px;
+    height: 300px;
     margin-top: 20px;
 }
 
-.light-intensity-panel button:hover {
-    background-color: #0056b3;
+/* Light Intensity Slider */
+input[type="range"] {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(to right, #00FF00, #FF7A00, #FF0000);
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+input[type="range"]::-webkit-slider-thumb,
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background-color: #FF0000;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Fan Status Panel */
+.fan-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+   
+}
+
+#fanStatus {
+    width: 400px;
+    height: auto;
+}
+
+/* Profile Icon */
+.profile-icon {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    font-size: 35px;
+    cursor: pointer;
+    background-color: #007acc; /* Blue background */
+    color: white;
+    border-radius: 50%;
+    padding: 15px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease;
+}
+
+.profile-icon:hover {
+    background-color: #005f99; /* Darker blue on hover */
+}
+
+/* Profile Container */
+.profile-container {
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 600px;
+    margin: 40px auto;
+}
+
+.profile-container img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid #007acc;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #333;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Profile Info Section */
+.profile-info {
+    padding: 25px;
+    background-color: #f7f7f7;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Individual Info Item */
+.info-item {
+    margin: 12px 0;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+/* RFID Tag & Preferences */
+#rfidTag, #lightPreference, #tempPreference {
+    font-weight: 600;
+    color: #007bff;
+}
+
+/* Button Styling */
+.back-button button {
+    padding: 15px 30px;
+    background-color: #2575fc;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background-color 0.3s ease-in-out;
+    margin-top: 20px;
+}
+
+.back-button button:hover {
+    background-color: #1c5ed6;
+}
+
+.back-button button:active {
+    transform: scale(0.98);
+}
+
+/* Gauge Layout */
+#gauge-container {
+    display: flex;
+    justify-content: space-around; /* Align gauges horizontally */
+    align-items: center;
+    width: 0%;
+}
+
+
+/* Responsive Design Adjustments */
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column; /* Stack the panels vertically on smaller screens */
+        align-items: center;
+        height: auto; /* Ensure it doesn't exceed the height */
+        padding: 0 15px; /* Adjust padding for small screens */
+    }
+
+    .panel {
+        width: 100%; /* Full width for small screens */
+        margin: 10px 0; /* Reduced margin */
+    }
+
+    .profile-container {
+        width: 90%;
+    }
+}
+
+/* Login Container */
+.login-container {
+    background: #fff;
+    color: #333;
+    padding: 30px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+
+.login-container h1 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.login-container p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.login-container button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background: #2575fc;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.login-container button:hover {
+    background: #1c5ed6;
+    transform: translateY(-2px);
+}
+
+.login-container button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.panel {
+    color: #333; 
 }
 
 #lightIntensityGauge {
@@ -177,4 +413,119 @@ input[type="range"]:active::-webkit-slider-thumb {
 
 input[type="range"]:active::-moz-range-thumb {
     background-color: #FF7A00;
+}
+
+
+/* 3D effect for the slider */
+#lightIntensitySlider {
+    width: 80%;
+    height: 20px;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 10px;
+    background: linear-gradient(to right, #00FF00, #FF7A00, #FF0000); /* Gradient colors */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* 3D shadow effect */
+    transition: all 0.3s ease;
+    border: none; 
+    margin: 0; 
+    outline: none; 
+}
+
+#lightIntensitySlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #FFD700; 
+    border: 3px solid #FFD700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#lightIntensitySlider::-moz-range-thumb {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #FFD700;
+    border: 3px solid #FFD700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#lightIntensitySlider:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); /* Focus effect */
+}
+.light-intensity-panel {
+    margin-bottom: 10px; /* Reduce the space below the light intensity panel */
+}
+
+/* Layout for top panels (light intensity, temperature, and humidity) */
+.top-panels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+/* Adjust panel sizes for the top row */
+.top-panels .panel {
+    width: 31%; /* Each panel now takes up roughly 28% of the width */
+    padding: 15px; /* Optionally reduce padding to make the panel smaller */
+}
+
+/* Fan status panel */
+.fan-panel {
+    width: 100%; /* Ensure fan panel takes full width */
+    margin-top: 20px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .top-panels {
+        flex-direction: column; /* Stack the panels vertically on small screens */
+        align-items: center;
+    }
+
+    .top-panels .panel {
+        width: 90%; /* Ensure each panel takes most of the width on smaller screens */
+        margin-bottom: 15px; /* Add space between stacked panels */
+    }
+
+    .fan-panel {
+        width: 90%;
+    }
+}
+/* Fan Status Panel */
+#fanStatus {
+    width: 300px; /* Reduced size of fan image */
+    height: auto;
+}
+h2 {
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Logout Button */
+.logout-button {
+    position: fixed; /* Ensure it's positioned absolutely relative to the viewport */
+    top: 20px;
+    right: 100px; /* Position it to the left of the Profile icon */
+    background-color: #ff4d4d;
+    color: white;
+    padding: 10px 20px; /* Adjusted padding for a consistent look */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: #ff3333;
 }
