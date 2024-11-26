@@ -50,6 +50,20 @@ body {
     transition: transform 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease;
 }
 
+.fan-container {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+
+#fanStatus {
+    width: 200px !important;  /*"!important forces it */
+    height: 200px !important; 
+    padding: 20px;
+    object-fit: contain; 
+}
+
 /* Hover Effect */
 .dashboard-title:hover {
     transform: scale(1.2) rotate(3deg); /* Slight zoom and rotation */
@@ -197,7 +211,7 @@ input[type="range"]::-moz-range-thumb {
     right: 20px;
     font-size: 35px;
     cursor: pointer;
-    background-color: #007acc; /* Blue background */
+    background-color: #7bcaff; /* Blue background */
     color: white;
     border-radius: 50%;
     padding: 15px;
@@ -206,7 +220,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .profile-icon:hover {
-    background-color: #005f99; /* Darker blue on hover */
+    background-color: #1b9cec; /* Darker blue on hover */
 }
 
 /* Profile Container */
@@ -513,8 +527,8 @@ h2 {
 /* Logout Button */
 .logout-button {
     position: fixed; /* Ensure it's positioned absolutely relative to the viewport */
-    top: 20px;
-    right: 100px; /* Position it to the left of the Profile icon */
+    top: 40px;
+    right: 125px; /* Position it to the left of the Profile icon */
     background-color: #ff4d4d;
     color: white;
     padding: 10px 20px; /* Adjusted padding for a consistent look */
@@ -527,5 +541,5 @@ h2 {
 }
 
 .logout-button:hover {
-    background-color: #ff3333;
+    background-color: rgb(202, 0, 0);
 }

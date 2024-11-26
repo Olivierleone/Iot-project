@@ -59,7 +59,7 @@
         <div class="panel fan-panel">
             <h2>Fan Status</h2>
             <div class="fan-container">
-                <img id="fanStatus" src="fan_table_off.png" alt="Fan is off" />
+                <img id="fanStatus" src="new_fan_off.png" alt="Fan is off"/>
             </div>
         </div>
     </div>
@@ -356,9 +356,9 @@ setInterval(fetchLightIntensity, 1000);
                 .then((data) => {
             const fanImg = document.getElementById("fanStatus");
             if (data.motor_active) {
-                fanImg.src = "fan_table_on.gif"; // Image showing fan spinning (used for animation for fan spinning)
+                fanImg.src = "new_fan_on.gif"; // Image showing fan spinning (used for animation for fan spinning)
             } else {
-                fanImg.src = "fan_table_off.png"; // Image showing fan off
+                fanImg.src = "new_fan_off.png"; // Image showing fan off
             }
         })
         .catch((error) => {
