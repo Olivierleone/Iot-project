@@ -9,7 +9,7 @@ body {
     height: 100vh;
     background: linear-gradient(135deg, #6a11cb, #2575fc, #00c6ff, #0072ff);
     background-size: 400% 400%; /* Makes the gradient larger than the screen */
-   /* animation: gradientFlow 10s ease infinite; /* Animation name, duration, and infinite loop */
+   animation: gradientFlow 10s ease infinite; /* Animation name, duration, and infinite loop 
     color: #fff;
     overflow: hidden; /* Prevent scrolling */
 }

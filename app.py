@@ -15,6 +15,7 @@ import paho.mqtt.client as mqtt
 import sqlite3
 import json
 
+
 rfid_scanned_from_mqtt = None
 # GPIO setup
 
@@ -38,13 +39,13 @@ light_intensity_value = 0
 
 #GPIO pins for motor control
  # Enable pin for the motor (MOTOR1)
-MOTOR1_PIN = 13  
+MOTOR1_PIN = 5  
 
 # Input pin for controlling the direction of MOTOR2
 MOTOR2_PIN = 6   
 
  # Input pin for controlling the direction of MOTOR3
-MOTOR3_PIN = 5  
+MOTOR3_PIN = 13  
 
 # Set the GPIO mode to BCM 
 # Disable warnings to avoid cluttering the output
@@ -88,6 +89,19 @@ EMAIL_ACCOUNT = "iot2024vaniercollege@gmail.com"
 EMAIL_PASSWORD = "rncz xybc adhk ljbq"  # App-specific password for email access
 
 
+def get_preferences_from_db(rfid):
+    print(f"Searching for preferences with RFID: {rfid}")  # Add a print to see the incoming RFID tag
+    conn = sqlite3.connect('iot_dashboard.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT temp_threshold, light_threshold FROM users WHERE rfid_tag = ?", (rfid,))
+    preferences = cursor.fetchone()
+    conn.close()
+    if preferences:
+        print(f"Found preferences: {preferences}")  # Log the preferences retrieved from DB
+        return {"temp_threshold": preferences[0], "light_threshold": preferences[1]}
+    print("No preferences found.")  # Log when no preferences are found
+    return None
+
 #method to connect to the mqtt broker
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT Broker")
@@ -95,49 +109,53 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_RFID_TOPIC)
 
 def on_message(client, userdata, msg):
-    global led_status, email_sent, light_intensity_value  # Declare the global variables
+    global rfid_scanned_from_mqtt, led_status, email_sent, light_intensity_value
 
     topic = msg.topic
-    payload = msg.payload.decode()  # Decode the raw payload
+    payload = msg.payload.decode()
     print(f"Received message on topic {topic}: {payload}")
 
-    global rfid_scanned_from_mqtt
     try:
         if topic == MQTT_LIGHT_TOPIC:
-            # Handle light intensity
-            light_intensity_value = int(payload)  # Update the global light intensity variable
+            light_intensity_value = int(payload)
             print(f"Light intensity: {light_intensity_value}")
 
-            if light_intensity_value < 400:
-                GPIO.output(LED_PIN, GPIO.HIGH)  # Turn on LED
-                led_status = "on"  # Update global led_status
-                print("LED turned ON (low light)")
+            if rfid_scanned_from_mqtt:
+                user_prefs = get_preferences_from_db(rfid_scanned_from_mqtt)
+                print(f"User preferences: {user_prefs}")  # Log the retrieved preferences
+                
+                if user_prefs:
+                    light_threshold = user_prefs["light_threshold"]
 
-                # Send email if not already sent
-                if not email_sent:
-                    send_light_status_email()
+                    if light_intensity_value < light_threshold:
+                        GPIO.output(LED_PIN, GPIO.HIGH)
+                        led_status = "on"
+                        print("LED turned ON (low light)")
+                        if not email_sent:
+                            send_light_status_email()
+                    else:
+                        GPIO.output(LED_PIN, GPIO.LOW)
+                        led_status = "off"
+                        print("LED turned OFF (sufficient light)")
+                        email_sent = False
+                else:
+                    print("No preferences found for this RFID.")
             else:
-                GPIO.output(LED_PIN, GPIO.LOW)  # Turn off LED
-                led_status = "off"  # Update global led_status
-                print("LED turned OFF (sufficient light)")
-
-                # Reset email_sent when light intensity goes above 400
-                email_sent = False
-                print("Email status reset to 'not sent' due to high light intensity")
+                print("No RFID scanned. Cannot determine user preferences.")
 
         elif topic == MQTT_RFID_TOPIC:
-            # Handle RFID data
-            rfid_tag = payload  # Read as a string
-            print(f"RFID Tag: {rfid_tag}")
-            rfid_scanned_from_mqtt = rfid_tag  # Set the scanned RFID value
+            rfid_scanned_from_mqtt = payload.strip()  # Strip any leading/trailing spaces
+            print(f"RFID Tag Scanned: {rfid_scanned_from_mqtt}")
 
-        else:
-            print(f"Unhandled topic: {topic}")
+            if not rfid_scanned_from_mqtt:
+                print("Received empty or invalid RFID tag.")
+            else:
+                print(f"RFID tag set successfully: {rfid_scanned_from_mqtt}")
 
-    except ValueError as ve:
-        print(f"ValueError: {ve}")
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"Error: {e}")
+
+
 # connecting to the mqtt brocker
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
@@ -193,11 +211,32 @@ def send_light_status_email():
             print(f"Failed to send email: {e}")
        
 
+def send_rfid_login_email(rfid):
+    sender_email = EMAIL_ACCOUNT
+    receiver_email = "olivier.leone90@gmail.com"  # Set your recipient email
+    subject = "RFID Login Notification"
+    body = f"RFID tag {rfid} logged in at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+
+    try:
+        with smtplib.SMTP(SMTP_SERVER, 587) as server:
+            server.starttls()
+            server.login(sender_email, EMAIL_PASSWORD)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            print("Login notification email sent successfully.")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
+
 # method to send emails each minute 
 def send_light_status_email_periodically():
     while True:
         send_light_status_email()
-        time.sleep(5)  # Wait for 1 minute before sending the next email
+        time.sleep(30)  # Wait for 5 minute before sending the next email
 
 # Activate the motor for a specified duration (default 10 seconds) and then disable it
 def activate_motor_for_duration(duration=10):
@@ -275,18 +314,38 @@ def toggle_led():
 # if temp is more than 24 from the dht11 sensor then send email that has the specified temp
 @app.route('/sensors', methods=['GET'])
 def get_sensor_data():
+    global rfid_scanned_from_mqtt
     print("Received request for /sensors")
     dht = DHT(DHTPin)
+
     for _ in range(15):
         if dht.readDHT11() == 0:
             humidity = dht.getHumidity()
             temperature = dht.getTemperature()
-            if temperature > 24:
-                send_email(temperature)
-            return jsonify({"humidity": round(humidity, 2), "temperature": round(temperature, 2)})
-        time.sleep(0.1)
-    return jsonify({"error": "Failed to retrieve data from the sensor"}), 500
 
+            # Fetch user preferences dynamically based on scanned RFID
+            if rfid_scanned_from_mqtt:
+                user_prefs = get_preferences_from_db(rfid_scanned_from_mqtt)
+                print(f"User preferences: {user_prefs}")
+                if user_prefs:
+                    temp_threshold = user_prefs["temp_threshold"]
+                    
+                    # Send email if temperature exceeds the user's threshold
+                    if temperature > temp_threshold:
+                        send_email(temperature)
+                else:
+                    print("No preferences found for this RFID.")
+            else:
+                print("No RFID scanned. Cannot determine user preferences.")
+
+            return jsonify({
+                "humidity": round(humidity, 2),
+                "temperature": round(temperature, 2)
+            })
+
+        time.sleep(0.1)
+
+    return jsonify({"error": "Failed to retrieve data from the sensor"}), 500
 # Check for unread email replies with the subject "Re: Temperature Alert" 
 # and activate the fan if a reply contains "yes"; track processed replies to prevent reactivation with messageID
 def check_email_reply():
@@ -361,12 +420,29 @@ def rfid_status():
             message = f"Welcome, {user[1]}!"  # Assuming user[1] is the user's name
             rfid_tag = rfid_scanned_from_mqtt  # Get the scanned RFID tag
             rfid_scanned_from_mqtt = None  # Reset after successful login
+            # Send email after successful login
+            send_rfid_login_email(rfid_tag)
             return jsonify({'success': True, 'rfid_tag': rfid_tag, 'message': message})
         else:
             rfid_scanned_from_mqtt = None  # Reset even for invalid RFID
             return jsonify({'success': False, 'message': 'Invalid RFID tag'})
     return jsonify({'success': False, 'message': 'No valid RFID scanned'})
 
+@app.route('/get_preferences/<rfid>', methods=['GET'])
+def get_preferences(rfid):
+    preferences = get_preferences_from_db(rfid)
+    if preferences:
+        return jsonify(preferences)
+    else:
+        return jsonify({'error': 'Preferences not found'}), 404
+
+        
+@app.route('/dashboard', methods=['POST'])
+def dashboard():
+    data = request.get_json()  # You can extract the JSON payload sent by the client
+    # Process the data as needed
+    print(f"Received data: {data}")
+    return jsonify({'message': 'Dashboard data received successfully'})
 
 
 def get_user_profile(rfid_tag):

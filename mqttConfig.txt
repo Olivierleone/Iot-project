@@ -1,31 +1,45 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <SPI.h>
+#include <MFRC522.h>
 
-// Replace these with your own Wi-Fi credentials
+// Wi-Fi credentials
 const char* ssid = "iPhone";
 const char* password = "12345678";
 
-// MQTT Broker information (use Raspberry Pi IP address)
+// MQTT Broker
 const char* mqtt_server = "172.20.10.4";  // Replace with your Raspberry Pi IP address
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-const int photoresistorPin = 34;  // Use the correct analog pin (GPIO34)
-const int ledPin = 27;  // LED pin
+// Define pins for RC522 RFID module
+#define SS_PIN 5   // SDA Pin on RC522
+#define RST_PIN 4  // RST Pin on RC522
+MFRC522 rfid(SS_PIN, RST_PIN);  // Create MFRC522 instance
+
+// Light sensor and LED
+const int photoresistorPin = 34;  // Analog pin for light sensor
+const int ledPin = 27;           // LED pin
 
 void setup() {
   Serial.begin(115200);
   pinMode(ledPin, OUTPUT);
-  
-  // Set the photoresistor pin as input (no need to do this for analog pins)
-  
+
+  // Initialize Wi-Fi
   setup_wifi();
+
+  // Set up MQTT client
   client.setServer(mqtt_server, 1883);
+
+  // Initialize RFID reader
+  SPI.begin();  // Start SPI bus
+  rfid.PCD_Init();
+  Serial.println("RFID reader initialized");
+  Serial.println("Place your RFID card near the reader...");
 }
 
 void setup_wifi() {
-  delay(10);
   Serial.println();
   Serial.print("Connecting to WiFi...");
   WiFi.begin(ssid, password);
@@ -53,13 +67,31 @@ void loop() {
     reconnect();
   }
   client.loop();
-  
-  // Read the light intensity from the photoresistor
-  int lightLevel = analogRead(photoresistorPin);  // Use analogRead() to get the value
+
+  // Publish light intensity
+  int lightLevel = analogRead(photoresistorPin);  // Read light level
   String lightMessage = String(lightLevel);
+  client.publish("home/light", lightMessage.c_str());  // Publish light level
+  Serial.println("Light intensity: " + lightMessage);
 
-  // Publish the light level to the topic
-  client.publish("home/light", lightMessage.c_str());
+  // Check for RFID cards
+  if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
+    String rfidTag = "";
+    Serial.print("Card UID:");
+    for (byte i = 0; i < rfid.uid.size; i++) {
+      rfidTag += String(rfid.uid.uidByte[i], HEX);  // Concatenate RFID tag bytes
+      Serial.print(rfid.uid.uidByte[i] < 0x10 ? " 0" : " ");
+      Serial.print(rfid.uid.uidByte[i], HEX);
+    }
+    Serial.println();
 
-  delay(2000);  // Delay between readings
+    // Publish RFID tag to MQTT
+    client.publish("home/rfid", rfidTag.c_str());
+    Serial.println("RFID Tag sent to MQTT: " + rfidTag);
+
+    // Halt PICC
+    rfid.PICC_HaltA();
+  }
+
+  delay(2000);  // Delay for stable readings
 }

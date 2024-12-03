@@ -30,6 +30,8 @@
                 <p>Light Intensity: <span id="lightIntensity">--</span></p>
                 <p id="lightStatusMessage" class="status">LED status: --</p>
                 <p id="emailStatusMessage" class="status">Email status: --</p>
+                <div class="fan-container">
+                <img id="lightStatus" src="light_off.png" alt="Light is off" width="50px"/></div>
                 <div class="slider-container">
                     <input type="range" id="lightIntensitySlider" min="0" max="1000" value="500" step="10" disabled>
                     <div class="slider-value">
@@ -73,32 +75,58 @@
 function logoutUser() {
     // Clear RFID tag and other sessionStorage items
     sessionStorage.clear();
-    
-    
+    window.location.href = '/index.html';
 }
 
-    // Notify the server when the user enters the dashboard
-    function enterDashboard() {
-        fetch('http://127.0.0.1:5000/dashboard', { method: 'POST' });
+    window.onload = function() {
+    const rfidTag = sessionStorage.getItem('rfid_tag');  // Retrieve the RFID tag from sessionStorage
+
+    if (!rfidTag) {
+        alert("No RFID tag found. Please log in again.");
+        window.location.href = '/index.html'; // Redirect to login if no RFID tag found
+        return;
     }
 
-     // Notify the server when the user exits the dashboard
-     function exitDashboard() {
-        fetch('http://127.0.0.1:5000/exit_dashboard', { method: 'POST' });
-    }
+    console.log("RFID tag from sessionStorage in dashboard:", rfidTag);
 
-    window.onload = enterDashboard;
-    window.onbeforeunload = exitDashboard;
+    // Fetch user preferences based on the RFID tag
+    fetchPreferences(rfidTag);
 
-        // Fetch RFID tag from sessionStorage and log it
-const rfidTag = sessionStorage.getItem('rfid_tag');
-//console.log("RFID tag from sessionStorage in dashboard:", rfidTag);
+    // Fetch sensor data
+    fetchSensorData();
+    createGauges();
 
-//FIX NO LOADING 
- if (!rfidTag) {
-    // alert("No RFID tag found. Please log in again.");
-     //window.location.href = '/index.html'; // Redirect to login if no RFID tag found
+    // Set up interval fetches for light intensity and motor status
+    setInterval(fetchLightIntensity, 1000);
+    setInterval(checkMotorStatus, 2000);
+
+    // Handle dashboard entry
+    enterDashboard();
+};
+
+function fetchPreferences(rfidTag) {
+    fetch(`http://127.0.0.1:5000/get_preferences/${rfidTag}`)  
+        .then(response => response.json())
+        .then(data => {
+            console.log("Fetched preferences:", data);
+            // Set the user preferences based on the response data
+        })
+        .catch(error => {
+            console.error("Error fetching preferences:", error);
+        });
 }
+
+function enterDashboard() {
+    fetch('http://127.0.0.1:5000/dashboard', { method: 'POST' })
+        .catch(error => console.error("Error notifying dashboard entry:", error));
+}
+
+function exitDashboard() {
+    fetch('http://127.0.0.1:5000/exit_dashboard', { method: 'POST' })
+        .catch(error => console.error("Error notifying dashboard exit:", error));
+}
+
+window.onbeforeunload = exitDashboard;
 
         // Update the slider value on input change
 const slider = document.getElementById("lightIntensitySlider");
@@ -134,11 +162,19 @@ function fetchLightIntensity() {
             const slider = document.getElementById("lightIntensitySlider");
             slider.value = data.light_intensity || 500; // Default to 500 if no value
 
+            const lightImg = document.getElementById("lightStatus");
+                
             // Update the LED status text
             if (data.led_status !== undefined) {
                 document.getElementById("lightStatusMessage").innerText = data.led_status === "on" ? "LED is ON" : "LED is OFF";
             } else {
                 console.error("LED status data is missing");
+            }
+            
+            if(data.led_status === "on"){
+                lightImg.src = "light_on.png";
+            }else{
+                lightImg.src = "light_off.png";
             }
 
             // Update email status message
